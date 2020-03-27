@@ -58,14 +58,11 @@ export default class BaseComponent extends cc.Component {
     registerAllCustomEvents(array) {
         this._eventList = this._eventList || []
         for (let i = 0; i < array.length; i++) {
-            if (!array[i][0] || !array[i][1]) {
+            if (!array[i][0] || !array[i][1] || typeof array[i][1] !== "function") {
                 continue
             }
             if (typeof array[i][0] !== "string") {
                 array[i][0] = String(array[i][0])
-            }
-            if (typeof array[i][1] !== "function") {
-                continue
             }
             this._eventList.push(array[i])
             this.node.on(array[i][0], array[i][1], this)

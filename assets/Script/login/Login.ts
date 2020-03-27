@@ -45,6 +45,7 @@ export default class Login extends BaseComponent {
                 case "LoginBtnReset":
                     break;
                 case "LoginBtnLogin":
+                    cc.director.loadScene("HallScene")
                     break;
                 case "LoginBtnQuickStart":
                     this._isShowLoginPanel(true)

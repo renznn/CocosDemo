@@ -35,7 +35,7 @@ export default class Loading extends BaseComponent {
         if (this.processBarItem.progress < 1.0) {
             this.processBarItem.progress += Math.random() * 0.2
         }else{
-
+            cc.director.loadScene("LoginScene")
         }
     }
 }
