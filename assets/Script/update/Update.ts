@@ -7,12 +7,17 @@
 
 const { ccclass, property } = cc._decorator;
 
+import BaseComponent from "../common/BaseComponent";
+
 @ccclass
 export default class Update extends cc.Component {
 
-    @property({type : cc.Asset})
-    manifestUrl=null
-    
+    @property({ type: cc.Asset })
+    manifestUrl = null
+
+    @property(cc.Button)
+    updateBtn = null
+
     _updating = false
     _canRetry = false
     _storagePath: string = null
@@ -27,13 +32,17 @@ export default class Update extends cc.Component {
         if (!cc.sys.isNative) {
             return;
         }
-        this._storagePath = ((jsb.fileUtils ? jsb.fileUtils.getWritablePath() : '/') + 'jxy-remote-asset');
-        cc.log('Storage path for remote asset : ' + this._storagePath);
 
-        cc.log(jsb)
+
+        this.updateBtn.node.on("click", this.hotUpdate, this)
+
+        this._storagePath = ((jsb.fileUtils ? jsb.fileUtils.getWritablePath() : '/') + 'jxy-remote-asset');
+        console.log('Storage path for remote asset : ' + this._storagePath);
+
+        console.log(jsb)
         // Init with empty manifest url for testing custom manifest
         this._am = new jsb.AssetsManager('', this._storagePath, this.versionCompareHandle);
-        cc.log(this._am)
+        console.log(this._am)
 
         this._am.setVerifyCallback(function (path, asset) {
             // When asset is compressed, we don't need to check its md5, because zip file have been deleted.
@@ -45,22 +54,22 @@ export default class Update extends cc.Component {
             // The size of asset file, but this value could be absent.
             var size = asset.size;
             if (compressed) {
-                cc.log("Verification passed : " + relativePath)
+                console.log("Verification passed : " + relativePath)
                 return true;
             }
             else {
-                cc.log("Verification passed : " + relativePath + ' (' + expectedMD5 + ')')
+                console.log("Verification passed : " + relativePath + ' (' + expectedMD5 + ')')
                 return true;
             }
         });
 
-        cc.log("Hot update is ready, please check or directly update.")
+        console.log("Hot update is ready, please check or directly update.")
 
         if (cc.sys.os === cc.sys.OS_ANDROID) {
             // Some Android device may slow down the download process when concurrent tasks is too much.
             // The value may not be accurate, please do more test and find what's most suitable for your game.
             this._am.setMaxConcurrentTask(2);
-            cc.log("Max concurrent tasks count have been limited to 2")
+            console.log("Max concurrent tasks count have been limited to 2")
         }
 
         // this.panel.fileProgress.progress = 0;
@@ -69,7 +78,7 @@ export default class Update extends cc.Component {
     }
 
     versionCompareHandle(versionA, versionB) {
-        cc.log("JS Custom Version Compare: version A is " + versionA + ', version B is ' + versionB);
+        console.log("JS Custom Version Compare: version A is " + versionA + ', version B is ' + versionB);
         var vA = versionA.split('.');
         var vB = versionB.split('.');
         for (var i = 0; i < vA.length; ++i) {
@@ -96,7 +105,7 @@ export default class Update extends cc.Component {
         var failed = false;
         switch (event.getEventCode()) {
             case jsb.EventAssetsManager.ERROR_NO_LOCAL_MANIFEST:
-                cc.log('No local manifest file found, hot update skipped.')
+                console.log('No local manifest file found, hot update skipped.')
                 failed = true;
                 break;
             case jsb.EventAssetsManager.UPDATE_PROGRESSION:
@@ -105,36 +114,36 @@ export default class Update extends cc.Component {
 
                 // this.panel.fileLabel.string = event.getDownloadedFiles() + ' / ' + event.getTotalFiles();
                 // this.panel.byteLabel.string = event.getDownloadedBytes() + ' / ' + event.getTotalBytes();
-                cc.log(event.getPercent(), event.getPercentByFile())
+                console.log(event.getPercent(), event.getPercentByFile())
                 var msg = event.getMessage();
                 if (msg) {
-                    cc.log('Updated file: ' + msg)
-                    // cc.log(event.getPercent()/100 + '% : ' + msg);
+                    console.log('Updated file: ' + msg)
+                    // console.log(event.getPercent()/100 + '% : ' + msg);
                 }
                 break;
             case jsb.EventAssetsManager.ERROR_DOWNLOAD_MANIFEST:
             case jsb.EventAssetsManager.ERROR_PARSE_MANIFEST:
-                cc.log('Fail to download manifest file, hot update skipped.')
+                console.log('Fail to download manifest file, hot update skipped.')
                 failed = true;
                 break;
             case jsb.EventAssetsManager.ALREADY_UP_TO_DATE:
-                cc.log('Already up to date with the latest remote version.')
+                console.log('Already up to date with the latest remote version.')
                 failed = true;
                 break;
             case jsb.EventAssetsManager.UPDATE_FINISHED:
-                cc.log('Update finished. ' + event.getMessage())
+                console.log('Update finished. ' + event.getMessage())
                 needRestart = true;
                 break;
             case jsb.EventAssetsManager.UPDATE_FAILED:
-                cc.log('Update failed. ' + event.getMessage())
+                console.log('Update failed. ' + event.getMessage())
                 this._updating = false;
                 this._canRetry = true;
                 break;
             case jsb.EventAssetsManager.ERROR_UPDATING:
-                cc.log('Asset update error: ' + event.getAssetId() + ', ' + event.getMessage())
+                console.log('Asset update error: ' + event.getAssetId() + ', ' + event.getMessage())
                 break;
             case jsb.EventAssetsManager.ERROR_DECOMPRESS:
-                cc.log(event.getMessage())
+                console.log(event.getMessage())
                 break;
             default:
                 break;
@@ -152,7 +161,7 @@ export default class Update extends cc.Component {
             // Prepend the manifest's search path
             var searchPaths = jsb.fileUtils.getSearchPaths();
             var newPaths = this._am.getLocalManifest().getSearchPaths();
-            cc.log(JSON.stringify(newPaths));
+            console.log(JSON.stringify(newPaths));
             Array.prototype.unshift.apply(searchPaths, newPaths);
             // This value will be retrieved and appended to the default search path during game startup,
             // please refer to samples/js-tests/main.js for detailed usage.
@@ -167,6 +176,7 @@ export default class Update extends cc.Component {
 
 
     hotUpdate() {
+        console.log("hot update in")
         if (this._am && !this._updating) {
             this._am.setEventCallback(this.updateCb.bind(this));
             if (this._am.getState() === jsb.AssetsManager.State.UNINITED) {
@@ -186,20 +196,20 @@ export default class Update extends cc.Component {
     }
 
     checkCb(event) {
-        cc.log('Code: ' + event.getEventCode());
+        console.log('Code: ' + event.getEventCode());
         switch (event.getEventCode()) {
             case jsb.EventAssetsManager.ERROR_NO_LOCAL_MANIFEST:
-                cc.log("No local manifest file found, hot update skipped.")
+                console.log("No local manifest file found, hot update skipped.")
                 break;
             case jsb.EventAssetsManager.ERROR_DOWNLOAD_MANIFEST:
             case jsb.EventAssetsManager.ERROR_PARSE_MANIFEST:
-                cc.log("Fail to download manifest file, hot update skipped.")
+                console.log("Fail to download manifest file, hot update skipped.")
                 break;
             case jsb.EventAssetsManager.ALREADY_UP_TO_DATE:
-                cc.log("Already up to date with the latest remote version.")
+                console.log("Already up to date with the latest remote version.")
                 break;
             case jsb.EventAssetsManager.NEW_VERSION_FOUND:
-                cc.log('New version found, please try to update.')
+                console.log('New version found, please try to update.')
                 // this.panel.checkBtn.active = false;
                 // this.panel.fileProgress.progress = 0;
                 // this.panel.byteProgress.progress = 0;
@@ -215,10 +225,9 @@ export default class Update extends cc.Component {
 
     checkUpdate() {
         if (this._updating) {
-            cc.log('Checking or updating ...')
+            console.log('Checking or updating ...')
             return;
         }
-        return
         if (this._am.getState() === jsb.AssetsManager.State.UNINITED) {
             // Resolve md5 url
             var url = this.manifestUrl.nativeUrl;
@@ -228,7 +237,7 @@ export default class Update extends cc.Component {
             this._am.loadLocalManifest(url);
         }
         if (!this._am.getLocalManifest() || !this._am.getLocalManifest().isLoaded()) {
-            cc.log('Failed to load local manifest ...')
+            console.log('Failed to load local manifest ...')
             return;
         }
         this._am.setEventCallback(this.checkCb.bind(this));
@@ -242,7 +251,7 @@ export default class Update extends cc.Component {
             // this.panel.retryBtn.active = false;
             this._canRetry = false;
 
-            cc.log('Retry failed Assets...')
+            console.log('Retry failed Assets...')
             this._am.downloadFailedAssets();
         }
     }
