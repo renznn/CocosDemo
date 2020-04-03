@@ -38,7 +38,7 @@ export default class BaseComponent extends cc.Component {
         }
         let btn = node.getComponent(cc.Button)
         if (btn) {
-            // cc.log(btn.node.name)
+            cc.log(btn.node.name)
             btn.node.on("click", this._onBtnClickCallback, this)
         }
         let arrayRootChidden = node.children

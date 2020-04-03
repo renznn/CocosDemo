@@ -1,15 +1,20 @@
 {
   "excludeScenes": [
-    "2d2f792f-a40c-49bb-a189-ed176a246e49"
+    "2d2f792f-a40c-49bb-a189-ed176a246e49",
+    "3857aaad-394e-4cb3-bcc5-0314c5e62d07",
+    "4cd0e59a-25ea-4f9f-9f12-bde10fbc0a42",
+    "c80ea208-ab14-4a02-ae6b-270384c91d84",
+    "6a3861ba-c819-4735-94ba-9ac818e66442",
+    "08b00f51-0da1-4fca-acdc-a87719ed3830"
   ],
   "orientation": {
     "landscapeLeft": true,
     "landscapeRight": true,
-    "portrait": true,
+    "portrait": false,
     "upsideDown": false
   },
   "packageName": "org.cocos2d.helloworld",
-  "startScene": "6a3861ba-c819-4735-94ba-9ac818e66442",
+  "startScene": "e335d637-76ed-4463-b2c7-2498fd0dff0b",
   "title": "Model",
   "webOrientation": "auto",
   "includeSDKBox": false,
